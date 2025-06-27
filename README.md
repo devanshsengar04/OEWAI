@@ -2,6 +2,8 @@
 
 An intelligent and modern web-based examination platform where teachers create exams, students attempt them online, and AI handles evaluation. Built with Node.js, MongoDB, and integrated with Google Gemini AI for MCQ generation and descriptive answer evaluation.
 
+🔗 **Live Site:** [https://oewai.onrender.com](https://oewai.onrender.com)
+
 
 ---
 
