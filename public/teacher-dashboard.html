@@ -1,0 +1,427 @@
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #efe63c, #95304d);
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .heading{
+      margin-top: 50px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 3.5em;
+      color: #fff;
+      font-weight: 750;
+    }
+
+    h3 {
+      margin-top: 40px;
+      font-size: 1.5em;
+      color: #fff;
+    }
+
+    /* Profile Info */
+    .profile-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-info label {
+      color: #fff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .profile-info span {
+      color: #fff;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button-group button {
+      flex: 1;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 5px;
+      background-color: #333;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .button-group button:hover {
+      background-color: #444;
+      transform: scale(1.05);
+    }
+
+    .button-group button:active {
+      background-color: #222;
+      transform: scale(1);
+    }
+
+    /* Logout Button */
+    #logoutButton {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #e74c3c;
+    }
+
+    #logoutButton:hover {
+      background-color: #c0392b;
+    }
+
+    /* Submitted Answers */
+    .submitted-answer {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .submitted-answer label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .submitted-answer input[type="text"] {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    .submitted-answer button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-top: 1rem;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .submitted-answer button:hover {
+      background-color: #45a049;
+    }
+
+    .username {
+      display: flex;
+      gap: 10px;
+      margin-top: -40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="heading">
+    <h2>Welcome to the Teacher Dashboard</h2>
+  </div>
+  <div class="container-1">
+    <div class="username">
+      <h3>Logged in as:</h3>
+      <h3 id="userEmail"></h3>
+    </div>
+  </div>
+  <button id="logoutButton">Logout</button>
+
+  <h3>Actions</h3>
+  <button onclick="window.location.href='teacher-profile.html'">Profile</button>
+  <button onclick="window.location.href='create-test.html'">Create Test</button>
+  <button onclick="window.location.href='teacher-results.html'">View Results</button>
+
+  <div class="container">
+    <form id="selectSubjectForm">
+      <label for="subjectCode">Select Subject Code:</label>
+      <input type="text" id="subjectCode" name="subjectCode" required>
+      <button type="submit" class="button-primary">View Submitted Answers</button>
+    </form>
+    
+    <div id="submittedAnswersContainer" style="display:none;">
+      <div id="answersContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const email = localStorage.getItem('email');
+      const fullName = localStorage.getItem('fullName');
+      
+      if (email) {
+        document.getElementById('userEmail').textContent = email;
+      }
+
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        localStorage.removeItem('email');
+        localStorage.removeItem('fullName');
+        window.location.href = 'index.html';
+      });
+    });
+
+    document.getElementById('selectSubjectForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const subjectCode = document.getElementById('subjectCode').value;
+      const response = await fetch(`/fetch-submitted-answers?subjectCode=${subjectCode}`);
+      const results = await response.json();
+
+      const answersContainer = document.getElementById('answersContainer');
+      answersContainer.innerHTML = '';
+
+      results.forEach((result) => {
+        const answerDiv = document.createElement('div');
+        answerDiv.classList.add('submitted-answer');
+
+        answerDiv.innerHTML = `
+          <label>Student Email: ${result.studentEmail}</label>
+          <label>Student Name: ${result.studentName}</label>
+          <label>Submitted Answers:</label>
+          <ul>
+            ${result.answers.map((answer, i) => `<li>Question ${i + 1}: ${answer}</li>`).join('')}
+          </ul>
+          <label for="score${result._id}">Score:</label>
+          <input type="text" id="score${result._id}" name="score" required>
+          <button onclick="uploadScore('${result._id}')">Upload Score</button>
+        `;
+
+        answersContainer.appendChild(answerDiv);
+      });
+
+      document.getElementById('submittedAnswersContainer').style.display = 'block';
+    });
+
+    async function uploadScore(resultId) {
+      const score = document.getElementById(`score${resultId}`).value;
+
+      const response = await fetch('/upload-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resultId, score })
+      });
+
+      if (response.ok) {
+        alert("Score uploaded successfully!");
+      } else {
+        alert("Error uploading score.");
+      }
+    }
+  </script>
+</body>
+</html> -->
+
+
+
+       
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #efe63c, #95304d);
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .heading{
+      margin-top: 150px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 3.5em;
+      color: #fff;
+      font-weight: 750;
+    }
+
+    h3 {
+      margin-top: 40px;
+      font-size: 1.5em;
+      color: #fff;
+    }
+
+    /* Profile Info */
+    .profile-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-info label {
+      color: #fff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .profile-info span {
+      color: #fff;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 50px;
+    }
+
+    .button-group button {
+      flex: 1;
+      padding: 18px 28px;
+      border: none;
+      border-radius: 5px;
+      background-color: #333;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .button-group button:hover {
+      background-color: #e0dede;
+      transform: scale(1.05);
+    }
+
+    .button-group button:active {
+      background-color: #b6b6b6;
+      transform: scale(1);
+    }
+
+    /* Logout Button */
+    #logoutButton {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #e74c3c;
+    }
+
+    #logoutButton:hover {
+      background-color: #c0392b;
+    }
+
+    .username {
+      display: flex;
+      gap: 10px;
+      margin-top: -40px;
+    }
+
+    .space{
+      margin-bottom: 279px;
+    }
+
+    .buttons {
+      margin-top: 80px;
+      display: flex;
+      gap: 70px;
+      color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="heading">
+    <h2>Welcome to the Teacher Dashboard</h2>
+  </div>
+  <div class="container-1">
+    <div class="username">
+      <h3>Logged in as:</h3>
+      <h3 id="userEmail"></h3>
+    </div>
+  </div>
+  <button id="logoutButton">Logout</button>
+
+  <div class="buttons">
+    <button onclick="window.location.href='teacher-profile.html'">Profile</button>
+    <button onclick="window.location.href='create-test.html'">Create Test</button>
+    <button onclick="window.location.href='AI_questions.html'">AI Questions</button>
+    <button onclick="window.location.href='view-answers.html'">View Answers</button>
+  </div>
+
+  <div class="space"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const email = localStorage.getItem('email');
+      const fullName = localStorage.getItem('fullName');
+      
+      if (email) {
+        document.getElementById('userEmail').textContent = email;
+      }
+
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        localStorage.removeItem('email');
+        localStorage.removeItem('fullName');
+        window.location.href = 'index.html';
+      });
+    });
+  </script>
+</body>
+</html>

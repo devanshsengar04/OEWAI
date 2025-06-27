@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Results</title>
+  <link rel="stylesheet" href="student-results.css">
+  <style>
+    body {
+      padding: 2rem;
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .result {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #f9f9f9;
+    }
+    .result p {
+      margin: 0.5rem 0;
+    }
+    .no-results {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>View Results</h2>
+  <div id="resultsContainer"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const email = localStorage.getItem('email');
+        if (!email) {
+          throw new Error('User not logged in');
+        }
+
+        const response = await fetch(`/fetch-results?studentEmail=${email}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch results');
+        }
+
+        const results = await response.json();
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        if (results.length === 0) {
+          resultsContainer.innerHTML = '<p class="no-results">No results available.</p>';
+        } else {
+          results.forEach(result => {
+            const resultElement = document.createElement('div');
+            resultElement.className = 'result';
+            resultElement.innerHTML = `
+              <p>Subject Code: ${result.subjectCode}</p>
+              <p>Score: ${result.score}</p>
+            `;
+            resultsContainer.appendChild(resultElement);
+          });
+        }
+      } catch (error) {
+        document.getElementById('resultsContainer').innerHTML = `<p class="no-results">${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
